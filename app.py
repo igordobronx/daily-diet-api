@@ -3,11 +3,16 @@ from flask_login import LoginManager, login_user, current_user, logout_user, log
 from database import db
 from models.user import User
 from models.refeicao import Refeicao
+from werkzeug.security import generate_password_hash, check_password_hash
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'charlesdobronx22'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 
 db.init_app(app)
 login_manager = LoginManager()
@@ -25,7 +30,9 @@ def criar_usuario():
     senha = data.get("senha")
 
     if nome and senha:
-        new_user = User(nome=nome, senha=senha)
+        senha_criptografada = generate_password_hash(senha)
+
+        new_user = User(nome=nome, senha=senha_criptografada)
         db.session.add(new_user)
         db.session.commit()
         return jsonify({"mensagem": "usuário criado com sucesso"})
@@ -38,11 +45,11 @@ def login():
     nome = data.get("nome")
     senha = data.get("senha")
 
-    if nome and senha:
-        user = User.query.filter_by(nome=nome).first()
-        if user:
-            login_user(user)
-            return jsonify({"mensagem": "login feito com sucesso"})
+    user = User.query.filter_by(nome=nome).first()
+
+    if user and check_password_hash(user.senha, senha):
+        login_user(user)
+        return jsonify({"mensagem": "login feito com sucesso"})
 
     return jsonify({"mensagem": "Nao foi possivel fazer login"}), 400
 
