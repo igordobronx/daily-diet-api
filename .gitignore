@@ -68,6 +68,23 @@ instance/
 # Scrapy stuff:
 .scrapy
 
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# Cache do Python
+__pycache__/
+*.pyc
+
+# Banco de Dados Local
+instance/
+*.db
+
+# Configurações de editores
+.vscode/
+.idea/
+
 # Sphinx documentation
 docs/_build/
 
